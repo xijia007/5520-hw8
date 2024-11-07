@@ -129,31 +129,17 @@ extension ViewController{
             // Hide progress indicator
             DispatchQueue.main.async {
                 self?.dismiss(animated: true) {
-//                    if let error = error as NSError? {
-//                        // Print the error code for debugging
-//                        print("Error code: \(error.code)")
-//                        
-//                        // Check for specific error codes
-//                        switch error.code {
-//                        default:
-//                            self?.showAlert(message: "No account found with this email or the password is incorrect. Please check your email or register.")
-//                        }
-//                    } else {
-//                        // User authenticated successfully
-//                        print("User signed in successfully")
-//                        // Perform any additional actions after successful sign-in
-//                        self?.showAlert(message: "Sign in successful!")
                     if let error = error as NSError? {
-                                            // Print the error code for debugging
-                                            print("Error code: \(error.code)")
-                                            
-                                            // Show alert and return to sign-in screen
-                                            self?.showAlertAndReturnToSignIn(message: "No account found with this email or the password is incorrect. Please check your email or register.")
-                                        } else {
-                                            // User authenticated successfully
-                                            print("User signed in successfully")
-                                            // Perform any additional actions after successful sign-in
-                                            self?.showAlert(message: "Sign in successful!")
+                        // Print the error code for debugging
+                        print("Error code: \(error.code)")
+                        
+                        // Show alert and return to sign-in screen
+                        self?.showAlertAndReturnToSignIn(message: "No account found with this email or the password is incorrect. Please check your email or register.")
+                    } else {
+                        // User authenticated successfully
+                        print("User signed in successfully")
+                        // Perform any additional actions after successful sign-in
+                        self?.showAlert(message: "Sign in successful!")
                     }
                 }
             }
