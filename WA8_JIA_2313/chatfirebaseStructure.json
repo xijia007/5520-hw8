@@ -1,0 +1,67 @@
+{
+    "chatList": [
+        {
+            "content": "no1",
+            "senderName": "1xj",
+            "senderUid": "PAxICsuIQBclY114ih7DdBvUPot1",
+            "dateAndTime": "November 6, 2024 at 12:37:46 PM UTC-8",
+            "channelId": "foio92uefae",
+        },
+        {
+            "content": "no2",
+            "senderName": "8xj",
+            "senderUid": "VM6knj48HMPsGu8t3H5JMot8V8s1",
+            "dateAndTime": "November 6, 2024 at 12:37:50 PM UTC-8",
+            "channelId": "23fawrfgszese",
+        },
+    ]
+}
+
+
+
+{
+    "chatChannels": [{
+    // channelId
+      "fwaefwaefewadf": [{
+          // participantId
+        "MOuL1sdbrnh0x1zGuXn7": {
+          "threads": [{
+              // threadId
+            "3a6Fo5rrUcBqhUJcLsP0": {
+              "content": "Wow, that's so cute!",
+              "dateAndTime": "April 12, 2021 at 10:44:11 PM UTC-5",
+              "senderId": "YCrPJF3shzWSHagmr0Zl2WZFBgT2",
+              "senderName": "1xj",
+            },
+            // threadId
+            "4LXlVnWnoqyZEuKiiubh": {
+              "content": "Yes he is.",
+              "dateAndTime": "April 12, 2021 at 10:40:05 PM UTC-5",
+              "senderId": "f84PFeGl2yaqUDaSiTVeqe9gHfD3",
+              "senderName": "8xj",
+            },
+          }]
+        },
+      }]
+    }]
+}
+
+{
+    "chatChannelParticipants": [{
+        // participantId
+        "fjioewafj23": {
+            "user1Nmame": "1xj",
+            "user1Uid": "YCrPJF3shzWSHagmr0Zl2WZFBgT2",
+            "user2Name": "8xj",
+            "user2Uid": "f84PFeGl2yaqUDaSiTVeqe9gHfD3",
+        },
+        // participantId
+        "faer34gq23": {
+            "user1Nmame": "1xj",
+            "user1Uid": "YCrPJF3shzWSHagmr0Zl2WZFBgT2",
+            "user2Name": "5xj",
+            "user2Uid": "f843afefaw3efawfiTVeqe9gHfD3",
+        },
+        
+    }]
+}
