@@ -55,7 +55,7 @@ extension ViewController{
         }
         
         //MARK: Sign In Action...
-        let signInAction = UIAlertAction(title: "Sign In", style: .default, handler: {(_) in
+        let signInAction = UIAlertAction(title: "Sign In                   ", style: .default, handler: {(_) in
             if let email = signInAlert.textFields![0].text,
                let password = signInAlert.textFields![1].text{
                 //MARK: sign-in logic for Firebase...

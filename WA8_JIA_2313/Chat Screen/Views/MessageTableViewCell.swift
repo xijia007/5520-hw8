@@ -12,6 +12,12 @@ class MessageTableViewCell: UITableViewCell {
     private let messageLabel = UILabel()
     private let dateLabel = UILabel()
     private let bubbleBackgroundView = UIView()
+    private var leadingConstraint: NSLayoutConstraint!
+    private var trailingConstraint: NSLayoutConstraint!
+    private var senderLeadingConstraint: NSLayoutConstraint!
+    private var senderTrailingConstraint: NSLayoutConstraint!
+    private var dateLeadingConstraint: NSLayoutConstraint!
+    private var dateTrailingConstraint: NSLayoutConstraint!
     
     var isCurrentUser: Bool = false {
         didSet {
@@ -45,6 +51,20 @@ class MessageTableViewCell: UITableViewCell {
         dateLabel.font = .systemFont(ofSize: 10, weight: .light)
         dateLabel.textColor = .darkGray
         
+        leadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
+        trailingConstraint = bubbleBackgroundView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
+        senderLeadingConstraint = senderLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
+        senderTrailingConstraint = senderLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
+        dateLeadingConstraint = dateLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
+        dateTrailingConstraint = dateLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
+
+        leadingConstraint.isActive = false
+        trailingConstraint.isActive = false
+        senderLeadingConstraint.isActive = false
+        senderTrailingConstraint.isActive = false
+        dateLeadingConstraint.isActive = false
+        dateTrailingConstraint.isActive = false
+        
         NSLayoutConstraint.activate([
             // Constraints for senderLabel
             senderLabel.topAnchor.constraint(equalTo: topAnchor, constant: 4),
@@ -70,32 +90,32 @@ class MessageTableViewCell: UITableViewCell {
         senderLabel.text = message.senderName
         messageLabel.text = message.body
         dateLabel.text = formatTimestamp(message.dateAndTime)
-        
-        // Update alignment based on sender
-        let leadingConstraint = bubbleBackgroundView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
-        let trailingConstraint = bubbleBackgroundView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
-        let senderLeading = senderLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
-        let senderTrailing = senderLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
-        let dateLeading = dateLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16)
-        let dateTrailing = dateLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
-        
-        // Reset constraints to avoid conflicts
-        leadingConstraint.isActive = false
-        trailingConstraint.isActive = false
-        senderLeading.isActive = false
-        senderTrailing.isActive = false
-        dateLeading.isActive = false
-        dateTrailing.isActive = false
+
+
+        NSLayoutConstraint.deactivate([
+            leadingConstraint,
+            trailingConstraint,
+            senderLeadingConstraint,
+            senderTrailingConstraint,
+            dateLeadingConstraint,
+            dateTrailingConstraint
+        ])
 
         if isCurrentUser {
-            trailingConstraint.isActive = true
-            senderTrailing.isActive = true
-            dateTrailing.isActive = true
-        } else {
-            leadingConstraint.isActive = true
-            senderLeading.isActive = true
-            dateLeading.isActive = true
-        }
+                trailingConstraint.isActive = true
+                senderTrailingConstraint.isActive = true
+                dateTrailingConstraint.isActive = true
+                bubbleBackgroundView.backgroundColor = UIColor.systemBlue
+                messageLabel.textColor = .white
+            } else {
+                leadingConstraint.isActive = true
+                senderLeadingConstraint.isActive = true
+                dateLeadingConstraint.isActive = true
+                bubbleBackgroundView.backgroundColor = UIColor(white: 0.9, alpha: 1)
+                messageLabel.textColor = .black
+            }
+
+        layoutIfNeeded()
     }
     
     private func formatTimestamp(_ timestamp: Double?) -> String {

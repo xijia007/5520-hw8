@@ -117,19 +117,26 @@ class OneOnOneChatViewController: UIViewController, UITableViewDelegate, UITable
     
     func sendMessageToChannel(channelId: String, text: String) {
         guard let currentUserUID = Auth.auth().currentUser?.uid else { return }
-        
+
         let message = Message(
             senderName: UserSessionManager.shared.currentUser?.name ?? "Unknown",
             senderEmail: UserSessionManager.shared.currentUser?.email ?? "Unknown",
             body: text,
             receiverName: recipientName,
-            receiverEmail: "receiver@example.com",  // Replace with actual recipient's email if available
+            receiverEmail: "receiver@example.com",
             dateAndTime: Date().timeIntervalSince1970
         )
-        
+
         chatManager.sendMessage(to: channelId, message: message) { [weak self] success in
             if success {
                 self?.chatInputView.messageTextField.text = ""
+                self?.messages.append(message)
+                let indexPath = IndexPath(row: self!.messages.count - 1, section: 0)
+                self?.tableView.performBatchUpdates({
+                    self?.tableView.insertRows(at: [indexPath], with: .automatic)
+                }, completion: { _ in
+                    self?.scrollToBottom()
+                })
                 self?.updateLastMessageInChannel(channelId: channelId, lastMessage: text)
             } else {
                 print("Failed to send message.")
