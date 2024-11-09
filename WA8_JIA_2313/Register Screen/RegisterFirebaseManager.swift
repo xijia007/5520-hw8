@@ -45,12 +45,12 @@ class RegisterFirebaseManager{
             }
             
             let userData: [String: Any] = [
+                "id": user.uid,                  // Add the user ID here
                 "name": name,
                 "email": email,
-                "uid": user.uid
             ]
             
-            self.db.collection("users").document(user.uid).setData(userData) { error in
+            Firestore.firestore().collection("users").document(user.uid).setData(userData) { error in
                 if let error = error {
                     print("Error saving user data: \(error.localizedDescription)")
                     completion(nil)

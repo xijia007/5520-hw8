@@ -10,7 +10,8 @@ import UIKit
 class MainScreenView: UIView {
     var profilePic: UIImageView!
     var labelText: UILabel!
-    var floatingButtonAddChat: UIButton!
+    var guidanceLabel: UILabel!
+    var activeChatsLabel: UILabel!
     var tableViewChats: UITableView!
     
     override init(frame: CGRect) {
@@ -19,15 +20,15 @@ class MainScreenView: UIView {
         
         setupProfilePic()
         setupLabelText()
-        setupFloatingButtonAddChat()
+        setupGuidanceLabel()
+        setupActiveChatsLabel()
         setupTableViewChats()
         initConstraints()
     }
     
-    //MARK: initializing the UI elements...
-    func setupProfilePic(){
+    func setupProfilePic() {
         profilePic = UIImageView()
-        profilePic.image = UIImage(systemName: "person.circle")?.withRenderingMode(.alwaysOriginal)
+        profilePic.image = UIImage(systemName: "person.circle")
         profilePic.contentMode = .scaleToFill
         profilePic.clipsToBounds = true
         profilePic.layer.masksToBounds = true
@@ -35,11 +36,30 @@ class MainScreenView: UIView {
         self.addSubview(profilePic)
     }
     
-    func setupLabelText(){
+    func setupLabelText() {
         labelText = UILabel()
         labelText.font = .boldSystemFont(ofSize: 14)
         labelText.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(labelText)
+    }
+    
+    func setupGuidanceLabel() {
+        guidanceLabel = UILabel()
+        guidanceLabel.text = "To start a new conversation, please click on the Contacts list."
+        guidanceLabel.font = .systemFont(ofSize: 14)
+        guidanceLabel.textColor = .gray
+        guidanceLabel.numberOfLines = 0
+        guidanceLabel.textAlignment = .center
+        guidanceLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.addSubview(guidanceLabel)
+    }
+    
+    func setupActiveChatsLabel() {
+        activeChatsLabel = UILabel()
+        activeChatsLabel.text = "Active Chats"
+        activeChatsLabel.font = .boldSystemFont(ofSize: 18)
+        activeChatsLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.addSubview(activeChatsLabel)
     }
     
     func setupTableViewChats() {
@@ -49,49 +69,36 @@ class MainScreenView: UIView {
         tableViewChats.estimatedRowHeight = 80
         tableViewChats.rowHeight = UITableView.automaticDimension
         self.addSubview(tableViewChats)
-        
     }
     
-    func setupFloatingButtonAddChat(){
-        floatingButtonAddChat = UIButton(type: .system)
-        floatingButtonAddChat.setTitle("", for: .normal)
-        floatingButtonAddChat.setImage(UIImage(systemName: "person.crop.circle.fill.badge.plus")?.withRenderingMode(.alwaysOriginal), for: .normal)
-        floatingButtonAddChat.contentHorizontalAlignment = .fill
-        floatingButtonAddChat.contentVerticalAlignment = .fill
-        floatingButtonAddChat.imageView?.contentMode = .scaleAspectFit
-        floatingButtonAddChat.layer.cornerRadius = 16
-        floatingButtonAddChat.imageView?.layer.shadowOffset = .zero
-        floatingButtonAddChat.imageView?.layer.shadowRadius = 0.8
-        floatingButtonAddChat.imageView?.layer.shadowOpacity = 0.7
-        floatingButtonAddChat.imageView?.clipsToBounds = true
-        floatingButtonAddChat.translatesAutoresizingMaskIntoConstraints = false
-        self.addSubview(floatingButtonAddChat)
-    }
-    
-    
-    //MARK: setting up constraints...
-    func initConstraints(){
+    func initConstraints() {
         NSLayoutConstraint.activate([
+            // Profile picture constraints
             profilePic.widthAnchor.constraint(equalToConstant: 32),
             profilePic.heightAnchor.constraint(equalToConstant: 32),
             profilePic.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 8),
             profilePic.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            
+
+            // Label text constraints aligned with profile picture
             labelText.topAnchor.constraint(equalTo: profilePic.topAnchor),
             labelText.bottomAnchor.constraint(equalTo: profilePic.bottomAnchor),
             labelText.leadingAnchor.constraint(equalTo: profilePic.trailingAnchor, constant: 8),
-   
             
-            tableViewChats.topAnchor.constraint(equalTo: profilePic.bottomAnchor, constant: 8),
-            tableViewChats.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            // Active chats label constraints
+            activeChatsLabel.topAnchor.constraint(equalTo: labelText.bottomAnchor, constant: 16),
+            activeChatsLabel.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            
+            // Table view constraints for chats
+            tableViewChats.topAnchor.constraint(equalTo: activeChatsLabel.bottomAnchor, constant: 8),
             tableViewChats.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             tableViewChats.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            tableViewChats.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -40),
             
-            floatingButtonAddChat.widthAnchor.constraint(equalToConstant: 48),
-            floatingButtonAddChat.heightAnchor.constraint(equalToConstant: 48),
-            floatingButtonAddChat.bottomAnchor.constraint(equalTo: self.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            floatingButtonAddChat.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            
+            // Guidance label constraints
+            guidanceLabel.topAnchor.constraint(equalTo: tableViewChats.bottomAnchor, constant: 16),
+            guidanceLabel.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            guidanceLabel.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            guidanceLabel.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor)
         ])
     }
     

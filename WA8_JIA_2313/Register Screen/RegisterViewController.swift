@@ -70,9 +70,17 @@ class RegisterViewController: UIViewController {
                 
                 if let authResult = authResult {
                     print("Registration successful for user: \(authResult.user.uid)")
-                    self.navigationController?.popViewController(animated: true)
-                } else {
-                    self.showAlert(message: "The email address is already in use by another account.")
+                    
+                    // Load the newly registered user's data into UserSessionManager
+                    UserSessionManager.shared.loadUserData { success in
+                        if success {
+                            print("User data loaded successfully after registration.")
+                            self.navigationController?.popViewController(animated: true)
+                        } else {
+                            print("Failed to load user data after registration.")
+                            self.showAlert(message: "Error loading user data.")
+                        }
+                    }
                 }
             }
         }

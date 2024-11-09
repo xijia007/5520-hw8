@@ -1,10 +1,3 @@
-//
-//  ChatTableViewManager.swift
-//  WA8_JIA_2313
-//
-//  Created by Xi Jia on 11/5/24.
-//
-
 import UIKit
 import FirebaseFirestore
 import FirebaseAuth
@@ -12,14 +5,15 @@ import FirebaseAuth
 class ChatTableViewManager: NSObject, UITableViewDataSource, UITableViewDelegate {
     var chatList: [ChatCell] = []
     weak var tableView: UITableView?
+    weak var navigationController: UINavigationController?
     
-    init(tableView: UITableView) {
+    init(tableView: UITableView, navigationController: UINavigationController) {
         super.init()
         self.tableView = tableView
+        self.navigationController = navigationController
         tableView.dataSource = self
         tableView.delegate = self
         fetchChatList()
-//        fetchChatParticipants()
     }
     
     func fetchChatList() {
@@ -29,41 +23,68 @@ class ChatTableViewManager: NSObject, UITableViewDataSource, UITableViewDelegate
         }
 
         let db = Firestore.firestore()
-        
+        chatList.removeAll() // Clear list to prevent duplicates
         db.collection("chatChannels")
-//            .whereField("senderUid", arrayContains: currentUserUID)
-//            .order(by: "lastMessageTimestamp", descending: true)
-            .limit(to: 20) // Limit the number of channels to fetch
+            .whereField("participants", arrayContains: currentUserUID)
+            .limit(to: 20)
             .getDocuments { [weak self] (querySnapshot, error) in
-            if let error = error {
-                print("Error getting documents: \(error)")
-                return
-            }
-            
-            guard let documents = querySnapshot?.documents else {
-                print("No documents found")
-                return
-            }
-            
-            self?.chatList = documents.compactMap { document -> ChatCell? in
-                let data = document.data()
-                guard let receiverName = data["receiverName"] as? String,
-                      let content = data["lastMessageContent"] as? String,
-                      let dateAndTime = data["lastMessageTimestamp"] as? Timestamp else {
-                    return nil
+                if let error = error {
+                    print("Error getting documents: \(error)")
+                    return
                 }
-                return ChatCell(receiverName: receiverName,
-                                content: content,
-                                dateAndTime: Int(dateAndTime.seconds),
-                                channelId: document.documentID)
+                
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents found in chatChannels.")
+                    return
+                }
+                
+                print("Fetched \(documents.count) chat documents from Firestore.")
+                
+                let dispatchGroup = DispatchGroup()
+                
+                for document in documents {
+                    let data = document.data()
+                    
+                    guard let lastMessageContent = data["lastMessageContent"] as? String, !lastMessageContent.isEmpty,
+                          let lastMessageTimestamp = data["lastMessageTimestamp"] as? Timestamp,
+                          let participants = data["participants"] as? [String] else {
+                        continue
+                    }
+                    
+                    let otherParticipantUID = participants.first { $0 != currentUserUID }
+                    
+                    if let otherUID = otherParticipantUID {
+                        dispatchGroup.enter()
+                        
+                        db.collection("users").document(otherUID).getDocument { userDoc, error in
+                            defer { dispatchGroup.leave() }
+                            
+                            guard let userData = userDoc?.data(), let otherName = userData["name"] as? String else {
+                                print("Failed to fetch other participant's name.")
+                                return
+                            }
+                            
+                            let chatCell = ChatCell(
+                                receiverName: otherName,
+                                receiverUID: otherUID,
+                                content: lastMessageContent,
+                                dateAndTime: Int(lastMessageTimestamp.seconds),
+                                channelId: document.documentID
+                            )
+                            
+                            self?.chatList.append(chatCell)
+                        }
+                    }
+                }
+                
+                dispatchGroup.notify(queue: .main) {
+                    self?.tableView?.reloadData()
+                }
             }
-            
-            DispatchQueue.main.async {
-                self?.tableView?.reloadData()
-            }
-        }
     }
-
+    
+    // MARK: - UITableViewDataSource and UITableViewDelegate
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return chatList.count
     }
@@ -78,7 +99,56 @@ class ChatTableViewManager: NSObject, UITableViewDataSource, UITableViewDelegate
         
         return cell
     }
+    
+    // Swipe to delete a chat with confirmation and full database removal
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let chatToDelete = chatList[indexPath.row]
+            
+            // Show confirmation alert
+            let alert = UIAlertController(
+                title: "Delete Chat",
+                message: "Are you sure you want to delete this chat? This will remove it for both users.",
+                preferredStyle: .alert
+            )
+            
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+                self.deleteChat(chatToDelete, at: indexPath)
+            }))
+            
+            navigationController?.present(alert, animated: true, completion: nil)
+        }
+    }
+    
+    private func deleteChat(_ chat: ChatCell, at indexPath: IndexPath) {
+        guard let channelId = chat.channelId else { return }
+        
+        let db = Firestore.firestore()
+        let chatChannelRef = db.collection("chatChannels").document(channelId)
+        
+        // Delete the entire chat channel document and its subcollection
+        chatChannelRef.delete { [weak self] error in
+            if let error = error {
+                print("Error deleting chat channel: \(error)")
+                return
+            }
+            
+            print("Chat channel deleted successfully.")
+            self?.chatList.remove(at: indexPath.row)
+            self?.tableView?.deleteRows(at: [indexPath], with: .automatic)
+            self?.fetchChatList()
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedChat = chatList[indexPath.row]
+        
+        let chatVC = OneOnOneChatViewController()
+        chatVC.recipientUID = selectedChat.receiverUID
+        chatVC.recipientName = selectedChat.receiverName
+        chatVC.chatChannelId = selectedChat.channelId
+        
+        navigationController?.pushViewController(chatVC, animated: true)
+    }
 }
-
-
-

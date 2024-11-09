@@ -12,98 +12,85 @@ import FirebaseFirestore
 class ViewController: UIViewController {
     
     let database = Firestore.firestore()
-
     let mainScreen = MainScreenView()
     
     var handleAuth: AuthStateDidChangeListenerHandle?
-    var currentUser:FirebaseAuth.User?
-    
-
-    var chatsList = [ChatCell]()
-    
-    // add an array of chats for the table view.
-    var chatChannels = [ChatChannel]()
-    
+    var currentUser: FirebaseAuth.User?
     var chatTableViewManager: ChatTableViewManager!
-    
+    var chatFirebaseManager: ChatFirebaseManager!
     
     override func loadView() {
         view = mainScreen
     }
     
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        // Set up the left bar button
+        
         setupLeftBarButton()
         
-//        chatTableViewManager.fetchChatList()
-        
-        //MARK: handling if the Authentication state is changed (sign in, sign out, register)...
-        handleAuth = Auth.auth().addStateDidChangeListener{ auth, user in
-            if user == nil{
-                //MARK: not signed in...
+        // Check if the user is signed in
+        handleAuth = Auth.auth().addStateDidChangeListener { [weak self] auth, user in
+            guard let self = self else { return }
+            
+            if let user = user {
+                // User is signed in
+                self.currentUser = user
+                self.setupRightBarButton(isLoggedin: true)
+                self.navigationItem.leftBarButtonItem?.isEnabled = true
+                
+                // Load user data and fetch all existing channels
+                UserSessionManager.shared.loadUserData { success in
+                    if success {
+                        self.mainScreen.labelText.text = "Welcome \(UserSessionManager.shared.currentUser?.name ?? "User")!"
+                        
+                        // Refresh chat list for all existing channels for the signed-in user
+                        if let currentUserUID = self.currentUser?.uid {
+                            self.chatFirebaseManager.fetchAllExistingChannelsForUser(userId: currentUserUID) { chatList in
+                                self.chatTableViewManager.chatList = chatList
+                                self.mainScreen.tableViewChats.reloadData()
+                            }
+                        }
+                    } else {
+                        print("Failed to load user data.")
+                        self.mainScreen.labelText.text = "Welcome!"
+                    }
+                }
+                
+            } else {
+                // User is not signed in
                 self.currentUser = nil
                 self.mainScreen.labelText.text = "Please sign in to see the chats!"
-                self.mainScreen.floatingButtonAddChat.isEnabled = false
-                self.mainScreen.floatingButtonAddChat.isHidden = true
-                
-            //MARK: Reset tableView...
-                self.chatsList.removeAll()
-                self.mainScreen.tableViewChats.reloadData()
-                //MARK: Sign in bar button...
                 self.setupRightBarButton(isLoggedin: false)
-                
-                // Disable the contacts button when not logged in
                 self.navigationItem.leftBarButtonItem?.isEnabled = false
-            }else{
-                //MARK: the user is signed in...
-                self.currentUser = user
-                self.mainScreen.labelText.text = "Welcome \(user?.displayName ?? "Anonymous")!"
-                self.mainScreen.floatingButtonAddChat.isEnabled = true
-                self.mainScreen.floatingButtonAddChat.isHidden = false
-                //MARK: Logout bar button...
-                self.setupRightBarButton(isLoggedin: true)
                 
-                // Enable the contacts button when logged in
-                self.navigationItem.leftBarButtonItem?.isEnabled = true
-
+                // Clear the chat list in the UI when the user is not signed in
+                self.chatTableViewManager.chatList.removeAll()
+                self.mainScreen.tableViewChats.reloadData()
             }
         }
     }
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         title = "My Chats"
         
-        //MARK: Make the titles look large...
-//        navigationController?.navigationBar.prefersLargeTitles = true
+        chatFirebaseManager = ChatFirebaseManager()
         
-//        //MARK: patching table view delegate and data source...
-//        mainScreen.tableViewChats.delegate = self
-//        mainScreen.tableViewChats.dataSource = self
-//
-//        //MARK: removing the separator line...
-//        mainScreen.tableViewChats.separatorStyle = .none
-//        chatTableViewManager = ChatTableViewManager(tableView: mainScreen.tableViewChats)
-        
-        //MARK: Put the floating button above all the views...
-        view.bringSubviewToFront(mainScreen.floatingButtonAddChat)
-        
-//        setupTableView()
-
-        //MARK: tapping the floating add chat button...
-        mainScreen.floatingButtonAddChat.addTarget(self, action: #selector(addChatButtonTapped), for: .touchUpInside)
-
+        // Initialize ChatTableViewManager to manage and display the list of chats
+        setupTableView()
     }
     
     func setupTableView() {
-            chatTableViewManager = ChatTableViewManager(tableView: mainScreen.tableViewChats)
-            mainScreen.tableViewChats.dataSource = chatTableViewManager
-            mainScreen.tableViewChats.delegate = chatTableViewManager
+        guard let navigationController = self.navigationController else {
+            print("Navigation controller is missing.")
+            return
         }
+        
+        chatTableViewManager = ChatTableViewManager(tableView: mainScreen.tableViewChats, navigationController: navigationController)
+        mainScreen.tableViewChats.dataSource = chatTableViewManager
+        mainScreen.tableViewChats.delegate = chatTableViewManager
+    }
     
     func setupLeftBarButton() {
         let contactsButton = UIBarButtonItem(
@@ -115,27 +102,33 @@ class ViewController: UIViewController {
         navigationItem.leftBarButtonItem = contactsButton
     }
     
+    func fetchAllExistingChannelsForUser(userId: String, completion: @escaping ([ChatCell]) -> Void) {
+        ChatFirebaseManager().fetchAllExistingChannelsForUser(userId: userId, completion: completion)
+    }
+    
     @objc func contactsButtonTapped() {
-        let contactsListVC = ContactsViewController() // Replace with your actual contacts list view controller
+        let contactsListVC = ContactsViewController()
         navigationController?.pushViewController(contactsListVC, animated: true)
     }
     
+    @objc func logoutButtonTapped() {
+        do {
+            try Auth.auth().signOut()
+            print("User signed out successfully.")
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
+        }
+    }
     
-
-    // populate the Add Contact screen.
-    @objc func addChatButtonTapped(){
-    //           let addContactController = AddContactViewController()
-    //           addContactController.currentUser = self.currentUser
-    //           navigationController?.pushViewController(addContactController, animated: true)
-        print("Add chat button tapped")
-       }
-
-
+    @objc func signInButtonTapped() {
+        print("Navigate to Sign In Screen")
+        // Implement navigation to sign-in screen if needed
+    }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        Auth.auth().removeStateDidChangeListener(handleAuth!)
+        if let handle = handleAuth {
+            Auth.auth().removeStateDidChangeListener(handle)
+        }
     }
-
-
 }

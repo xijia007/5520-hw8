@@ -12,12 +12,12 @@ struct Contact: Codable{
    
     var name: String
     var email: String
-    var uid: String
+    var id: String
 
-    init(name: String, email: String, uid: String) {
+    init(name: String, email: String, id: String) {
         self.name = name
         self.email = email
-        self.uid = uid
+        self.id = id
 
     }
 }

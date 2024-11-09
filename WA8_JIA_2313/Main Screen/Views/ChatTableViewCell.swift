@@ -5,20 +5,16 @@
 //  Created by Xi Jia on 11/5/24.
 //
 
-
 import UIKit
 
 class ChatTableViewCell: UITableViewCell {
-    var receiverNameLabel: UILabel!
-    var contentLabel: UILabel!
-    var dateTimeLabel: UILabel!
+    private let receiverNameLabel = UILabel()
+    private let contentLabel = UILabel()
+    private let dateTimeLabel = UILabel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
-        setupReceiverNameLabel()
-        setupContentLabel()
-        setupDateTimeLabel()
+        setupViews()
         initConstraints()
     }
     
@@ -26,29 +22,22 @@ class ChatTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setupReceiverNameLabel() {
-        receiverNameLabel = UILabel()
+    private func setupViews() {
         receiverNameLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        receiverNameLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(receiverNameLabel)
-    }
-    
-    func setupContentLabel() {
-        contentLabel = UILabel()
         contentLabel.font = UIFont.systemFont(ofSize: 14)
-        contentLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(contentLabel)
-    }
-    
-    func setupDateTimeLabel() {
-        dateTimeLabel = UILabel()
         dateTimeLabel.font = UIFont.systemFont(ofSize: 12)
         dateTimeLabel.textColor = .gray
+        
+        receiverNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentLabel.translatesAutoresizingMaskIntoConstraints = false
         dateTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        contentView.addSubview(receiverNameLabel)
+        contentView.addSubview(contentLabel)
         contentView.addSubview(dateTimeLabel)
     }
     
-    func initConstraints() {
+    private func initConstraints() {
         NSLayoutConstraint.activate([
             receiverNameLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             receiverNameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),

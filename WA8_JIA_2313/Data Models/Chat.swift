@@ -12,15 +12,17 @@ struct ChatList: Codable {
     var chatList: [ChatCell]
 }
 
-struct ChatCell: Codable{
-
+struct ChatCell: Codable {
     var receiverName: String
+    var receiverUID: String // Add receiverUID to store the recipient's UID
     var content: String
     var dateAndTime: Int
     @DocumentID var channelId: String?
-    
-    init(receiverName: String, content: String, dateAndTime: Int, channelId: String) {
+
+    // Updated initializer to include receiverUID
+    init(receiverName: String, receiverUID: String, content: String, dateAndTime: Int, channelId: String) {
         self.receiverName = receiverName
+        self.receiverUID = receiverUID
         self.content = content
         self.dateAndTime = dateAndTime
         self.channelId = channelId
@@ -34,7 +36,7 @@ struct ChatChannels: Codable {
 struct ChatChannel: Codable {
     @DocumentID var channelId: String?
     var threads: [Thread]
-    var participantId: String
+    var participants: [String] // Store an array of participant UIDs to match Firestore structure
 }
 
 struct Thread: Codable {
@@ -45,7 +47,7 @@ struct Thread: Codable {
     var senderUid: String
 }
 
-struct chatChannelParticipants: Codable {
+struct ChatChannelParticipants: Codable {
     @DocumentID var participantId: String?
     var creatorName: String
     var creatorUid: String

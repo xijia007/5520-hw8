@@ -45,25 +45,27 @@ class RegisterView: UIView {
         self.addSubview(textFieldEmail)
     }
     
-    func setuptextFieldPassword(){
+    func setuptextFieldPassword() {
         textFieldPassword = UITextField()
         textFieldPassword.placeholder = "Password"
-        textFieldPassword.textContentType = .password
+        textFieldPassword.textContentType = .none  // Disable auto strong password suggestion
+        textFieldPassword.passwordRules = nil       // Disable iOS password rules
         textFieldPassword.isSecureTextEntry = true
         textFieldPassword.borderStyle = .roundedRect
         textFieldPassword.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(textFieldPassword)
     }
-    
-    func setupTextFieldRepeatPassword(){
+
+    func setupTextFieldRepeatPassword() {
         textFieldRepeatPassword = UITextField()
         textFieldRepeatPassword.placeholder = "Repeat Password"
-        textFieldRepeatPassword.textContentType = .newPassword
+        textFieldRepeatPassword.textContentType = .none  // Disable auto strong password suggestion
+        textFieldRepeatPassword.passwordRules = nil       // Disable iOS password rules
         textFieldRepeatPassword.isSecureTextEntry = true
         textFieldRepeatPassword.borderStyle = .roundedRect
         textFieldRepeatPassword.translatesAutoresizingMaskIntoConstraints = false
-           self.addSubview(textFieldRepeatPassword)
-       }
+        self.addSubview(textFieldRepeatPassword)
+    }
     
     func setupbuttonRegister(){
         buttonRegister = UIButton(type: .system)

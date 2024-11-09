@@ -1,9 +1,8 @@
-////
-////  ContactsViewController.swift
-////  WA8_JIA_2313
-////
-////  Created by Xi Jia on 11/5/24.
-////
+//
+//  ContactsViewController.swift
+//  WA8_JIA_2313
+//
+//  Created by Xi Jia on 11/5/24.
 //
 
 import UIKit
@@ -43,7 +42,7 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
         print("current user uid: \(currentUserUID)")
         
         let db = Firestore.firestore()
-        db.collection("users").whereField("uid", isNotEqualTo: currentUserUID).getDocuments { [weak self] (querySnapshot, error) in
+        db.collection("users").whereField("id", isNotEqualTo: currentUserUID).getDocuments { [weak self] (querySnapshot, error) in
             if let error = error {
                 print("Error getting documents: \(error)")
                 return
@@ -58,10 +57,10 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
                 let data = document.data()
                 guard let name = data["name"] as? String,
                       let email = data["email"] as? String,
-                      let uid = data["uid"] as? String else {
+                      let id = data["id"] as? String else {
                     return nil
                 }
-                return Contact(name: name, email: email, uid: uid)
+                return Contact(name: name, email: email, id: id)
             }
             
             DispatchQueue.main.async {
@@ -88,9 +87,13 @@ class ContactsViewController: UIViewController, UITableViewDataSource, UITableVi
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-           tableView.deselectRow(at: indexPath, animated: true)
-           let selectedContact = contacts[indexPath.row]
-          
-           navigationController?.pushViewController(oneOnOneChatViewController, animated: true)
-       }
+        tableView.deselectRow(at: indexPath, animated: true)
+        let selectedContact = contacts[indexPath.row]
+        
+        let chatVC = OneOnOneChatViewController()
+        chatVC.recipientUID = selectedContact.id
+        chatVC.recipientName = selectedContact.name
+        
+        navigationController?.pushViewController(chatVC, animated: true)
+    }
 }
